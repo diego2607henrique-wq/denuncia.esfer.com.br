@@ -1,11 +1,26 @@
 const express = require("express");
 const denunciaController = require("./controllers/denunciaController");
+const { validarDenuncia } = require("./middleware/validacao");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
+
+// Middleware de validação para POST
+app.use("/api/denuncias", (req, res, next) => {
+  if (req.method === "POST") {
+    const erros = validarDenuncia(req.body);
+    if (erros.length > 0) {
+      return res.status(400).json({
+        erro: "Dados inválidos",
+        detalhes: erros
+      });
+    }
+  }
+  next();
+});
 
 // Rotas
 app.use("/api/denuncias", require("./routes/denuncias"));
